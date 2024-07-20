@@ -7413,11 +7413,9 @@ void Game::sendMessages(
 			attackerPlayer->updateImpactTracker(damage.secondary.type, damage.secondary.value);
 		}
 	}
+
 	if (targetPlayer) {
-		std::string cause = "(other)";
-		if (attacker) {
-			cause = attacker->getName();
-		}
+		std::string cause = attacker ? attacker->getName() : "(other)";
 
 		targetPlayer->updateInputAnalyzer(damage.primary.type, damage.primary.value, cause);
 		if (attackerPlayer) {
@@ -7425,14 +7423,17 @@ void Game::sendMessages(
 				attackerPlayer->updateInputAnalyzer(damage.secondary.type, damage.secondary.value, cause);
 			}
 		}
+		realDamage = (targetPlayer->getHealth() > realDamage) ? realDamage : targetPlayer->getHealth(); // if targetPlayer Death 
 	}
-	std::stringstream ss;
 
+	if (target)
+		realDamage = (target->getHealth() > realDamage) ? realDamage : target->getHealth(); // if target Death
+
+	std::stringstream ss;
 	ss << realDamage << (realDamage != 1 ? " hitpoints" : " hitpoint");
 	std::string damageString = ss.str();
 
 	std::string spectatorMessage;
-
 	for (const std::shared_ptr<Creature> &spectator : spectators) {
 		std::shared_ptr<Player> tmpPlayer = spectator->getPlayer();
 		if (!tmpPlayer || tmpPlayer->getPosition().z != targetPos.z) {
